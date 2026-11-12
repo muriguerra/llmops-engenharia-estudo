@@ -1,0 +1,25 @@
+services:
+  postgres-pgvector:
+    image: pgvector/pgvector:pg16
+    container_name: unicamp-pgvector
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-unicamp_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-unicamp_pass}
+      POSTGRES_DB: ${POSTGRES_DB:-unicamp_rag}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - pgvector_data:/var/lib/postgresql/data
+      - ./docker/initdb:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-unicamp_user} -d ${POSTGRES_DB:-unicamp_rag}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pgvector_data:
+    name: unicamp_pgvector_data

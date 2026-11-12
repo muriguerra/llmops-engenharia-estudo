@@ -1,0 +1,26 @@
+# Ambientes Virtuais Python
+.venv/
+venv/
+ENV/
+env/
+
+# Cache e Bytecode Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Variáveis de Ambiente e Segredos (NUNCA versionar .env real)
+.env
+*.env.local
+
+# Jupyter Notebooks checkpoints
+.ipynb_checkpoints/
+
+# Cache de Modelos HuggingFace / PyTorch locais (caso salvos na pasta)
+.cache/
+models/
+
+# Arquivos temporários do Sistema Operacional e IDEs
+.DS_Store
+Thumbs.db
+.vscode/settings.json
