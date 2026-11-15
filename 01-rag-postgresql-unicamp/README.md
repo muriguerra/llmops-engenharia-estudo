@@ -54,6 +54,7 @@ flowchart TB
 ```text
 01-rag-postgresql-unicamp/
 ├── README.md                        # Documentação técnica completa do projeto
+├── GUIA_TEORICO.md                  # Apostila teórica completa e revisão de engenharia do Desafio 01
 ├── TODO.md                          # Roteiro guiado de estudo passo a passo (6 fases)
 ├── requirements.txt                 # Dependências Python do projeto
 ├── docker-compose.yml               # Orquestração do container PostgreSQL 16 + pgvector
@@ -247,5 +248,6 @@ python src/retrieval/search.py --pergunta "inteligência artificial, aprendizado
 
 ---
 
-## 8. Roteiro de Estudo Guiado
-Todas as 6 fases deste desafio foram concluídas e validadas. Para revisar o checklist pedagógico passo a passo, consulte o arquivo [TODO.md](./TODO.md).
+## 8. Roteiro de Estudo Guiado e Apostila Teórica
+- **Revisão Teórica Completa:** Consulte o arquivo [GUIA_TEORICO.md](./GUIA_TEORICO.md) para estudar todos os conceitos matemáticos e de engenharia revisados ponto a ponto (RAG Híbrido, Operadores `pgvector`, Docker & Volumes, *Polite Scraping* com *Keep-Alive* e Checkpoints `.jsonl`, *Contextual Chunking*, GPU FP16 com `BAAI/bge-m3` e Índices `B-Tree` vs `IVFFlat` vs `HNSW`).
+- **Checklist Passo a Passo:** Todas as 6 fases deste desafio foram concluídas e validadas em [TODO.md](./TODO.md).

@@ -6,7 +6,7 @@ Repositório central para os 5 projetos práticos de Engenharia de Dados, IA e L
 
 | # | Projeto | Foco Técnico | Stack Principal | Status |
 | :--- | :--- | :--- | :--- | :--- |
-| **01** | [01-rag-postgresql-unicamp](./01-rag-postgresql-unicamp/README.md) | Busca Semântica Híbrida (Relacional + Vetorial) em Produção | PostgreSQL (`pgvector`), Docker, LangChain, `BAAI/bge-m3` | Em andamento |
+| **01** | [01-rag-postgresql-unicamp](./01-rag-postgresql-unicamp/README.md) ([Guia Teórico](./01-rag-postgresql-unicamp/GUIA_TEORICO.md)) | Busca Semântica Híbrida (Relacional + Vetorial) em Produção | PostgreSQL (`pgvector`), Docker, LangChain, `BAAI/bge-m3` | Concluído |
 | **02** | `02-llm-eval-pipeline` | Testes Determinísticos de Prompt e *LLM-as-a-Judge* | Promptfoo / DeepEval, Pytest, Golden Dataset | Planejado |
 | **03** | `03-rfc-arquitetura-eventos` | Design Doc / RFC e Modelagem de Sistemas Distribuídos | Markdown, Mermaid.js, DLQ & Contratos de API | Planejado |
 | **04** | `04-refatoracao-pandas-polars` | Modernização Autônoma de Código Legado com Agentes | Polars (Lazy Evaluation), Ruff, Pytest, Type Hints | Planejado |
