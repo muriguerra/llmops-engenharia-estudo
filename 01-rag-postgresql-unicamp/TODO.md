@@ -44,16 +44,19 @@ Este guia foi estruturado em **6 fases progressivas** para você estudar os conc
 
 ---
 
-## Fase 3: Coleta de Dados, Parsing de PDFs e Estratégia de Chunking
-**Objetivo:** Transformar PDFs brutos da UNICAMP em blocos de texto estruturados com metadados ricos.
+## Fase 3: Coleta de Dados (Web Scraper DAC), Parsing e Estratégia de Chunking
+**Objetivo:** Coletar as disciplinas reais de 2026 (`1S` e `2S`) direto do Caderno de Horários da DAC UNICAMP com *checkpoint* incremental e paralelismo, estruturando os blocos de texto com metadados ricos.
 
-- [ ] **3.1. Coletar amostras reais de PDFs (`data/raw/`):**
-  - Baixar 3 a 5 PDFs de ementas/catálogo de graduação da DAC (ex: disciplinas do `IMECC`, `IC` e `IFGW`) e 1 ou 2 resoluções acadêmicas.
-- [ ] **3.2. Construir o extrator de texto e metadados (`src/ingestion/pdf_parser.py`):**
-  - Extrair o texto preservando a associação com os metadados relacionais (`instituto`, `codigo_disciplina`, `ano`, `arquivo_origem`).
-- [ ] **3.3. Definir e testar a estratégia de Chunking (`RecursiveCharacterTextSplitter`):**
-  - Estudar o impacto de `chunk_size` (ex: 500 a 1000 caracteres/tokens) e `chunk_overlap` (ex: 100 a 150).
-  - Garantir que cada *chunk* herde os metadados relacionais do documento pai (fundamental para o `WHERE instituto = 'IMECC'`).
+- [x] **3.1. Preparar dependências de Web Scraping e arquitetura de coleta (`data/raw/`):**
+  - Adicionar `requests` e `beautifulsoup4` ao `requirements.txt` e instalar no `.venv`.
+  - Definir o formato de *checkpoint* incremental em JSON Lines (`data/raw/disciplinas_2026.jsonl`).
+- [x] **3.2. Construir o Web Scraper paralelo com Checkpoint (`src/ingestion/dac_scraper.py`):**
+  - Varredura de `1S` e `2S` de `2026` no portal da DAC (`https://www.dac.unicamp.br/portal/caderno-de-horarios/2026/{semestre}/S/G`).
+  - Extração de `ano`, `semestre`, `instituto`, `codigo_disciplina`, `titulo`, `ementa`, `creditos`, `pre_requisitos` e metadados extras (`continencia`, `equivalencia`, `url`).
+  - Validar primeiro com o instituto `IMECC` e depois expandir para todos os institutos.
+- [x] **3.3. Definir e testar a estratégia de Chunking e Enriquecimento (`src/ingestion/chunker.py`):**
+  - Estudar o impacto de `chunk_size` e `chunk_overlap` com `RecursiveCharacterTextSplitter`.
+  - Garantir que cada *chunk* receba cabeçalho contextual e herde os metadados relacionais da disciplina (fundamental para o `WHERE instituto = 'IMECC'`).
 
 ---
 
