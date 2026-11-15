@@ -63,14 +63,14 @@ Este guia foi estruturado em **6 fases progressivas** para você estudar os conc
 ## Fase 4: Geração de Embeddings Locais com `BAAI/bge-m3`
 **Objetivo:** Gerar vetores densos multilíngues de alta qualidade na sua máquina e persistir no PostgreSQL.
 
-- [ ] **4.1. Estudar as características do modelo `BAAI/bge-m3`:**
+- [x] **4.1. Estudar as características do modelo `BAAI/bge-m3`:**
   - Por que o `bge-m3` é excelente para português? (Suporte multilíngue nativo, janela de até 8192 tokens e vetor denso de `1024` dimensões).
   - Entender a importância de normalizar os vetores (`normalize_embeddings=True`) ao trabalhar com similaridade de cosseno.
-- [ ] **4.2. Implementar o módulo de Embeddings (`src/embeddings/embedder.py`):**
-  - Carregar o modelo via `HuggingFaceEmbeddings` ou `SentenceTransformer("BAAI/bge-m3")`.
+- [x] **4.2. Implementar o módulo de Embeddings (`src/embeddings/embedder.py`):**
+  - Carregar o modelo via `SentenceTransformer("BAAI/bge-m3")` com suporte a GPU NVIDIA (`float16`).
   - Testar a geração de um vetor para uma frase simples e verificar se `len(vetor) == 1024`.
-- [ ] **4.3. Implementar o pipeline de Ingestão no Banco (`src/database/ingest.py`):**
-  - Inserir em lote (*batch insert*) os chunks + metadados relacionais + vetor `embedding` na tabela do PostgreSQL.
+- [x] **4.3. Implementar o pipeline de Ingestão no Banco (`src/database/ingest.py`):**
+  - Inserir em lote (*batch insert*) os 5.217 chunks + metadados relacionais + vetor `embedding` (1024 dimensões) na tabela `documentos_unicamp` do PostgreSQL.
 
 ---
 
