@@ -77,12 +77,12 @@ Este guia foi estruturado em **6 fases progressivas** para você estudar os conc
 ## Fase 5: Índices Vetoriais (`HNSW` vs `IVFFlat`)
 **Objetivo:** Dominar a diferença entre busca exata (*Sequential Scan*) e busca aproximada (*ANN - Approximate Nearest Neighbor*).
 
-- [ ] **5.1. Estudar a teoria dos índices no `pgvector`:**
+- [x] **5.1. Estudar a teoria dos índices no `pgvector`:**
   - **Sem índice (Exact KNN):** O banco calcula o cosseno contra 100% das linhas (precisão 100%, mas lento em grandes volumes).
   - **IVFFlat (*Inverted File with Flat Compression*):** Agrupa vetores em *clusters* (`lists`) via k-means. Requer que a tabela já tenha dados ao criar o índice; ajuste do parâmetro `ivfflat.probes` na hora da busca.
   - **HNSW (*Hierarchical Navigable Small World*):** Grafo multicamada de alta performance e excelente *recall*; pode ser criado com a tabela vazia; ajuste de `m`, `ef_construction` (criação) e `hnsw.ef_search` (busca).
-- [ ] **5.2. Criar os índices com a classe de operador correta (`vector_cosine_ops`):**
-  - Testar a criação do índice HNSW:
+- [x] **5.2. Criar os índices com a classe de operador correta (`vector_cosine_ops`):**
+  - Testar a criação dos índices `IVFFlat` e `HNSW` (`src/database/benchmark_indexes.py`):
     `CREATE INDEX ON documentos_unicamp USING hnsw (embedding vector_cosine_ops) WITH (m = 16, ef_construction = 64);`
   - Usar `EXPLAIN ANALYZE` no PostgreSQL para comprovar que o planejador está usando o índice e entender como filtros `WHERE` interagem com índices vetoriais (*pre-filtering* vs *post-filtering* e *iterative index scans* nas versões recentes do `pgvector`).
 

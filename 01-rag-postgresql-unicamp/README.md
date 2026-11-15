@@ -45,6 +45,7 @@ flowchart TB
 | **Modelo de Embedding** | **`BAAI/bge-m3` (`1024` dimensões)** | Multilíngue (Português nativo), vetores normalizados (`Norma L2 = 1.0`) |
 | **Performance de Vetorização** | **~55 chunks/segundo (91,3s total)** | Executado localmente em GPU NVIDIA (`CUDA 12.6`) utilizando precisão mista `FP16 (torch.float16)` (~1,1 GB de VRAM) |
 | **Armazenamento no PostgreSQL** | **5.217 linhas (`33 MB` em disco)** | Container Docker `pgvector/pgvector:pg16` com volume persistente |
+| **Aceleração com Índice HNSW** | **`0,582 ms` (~64,5x mais rápido)** | Comparado ao `Sequential Scan` (`37,541 ms`), mantendo `100,0%` de `Recall@10` |
 
 ---
 
@@ -72,8 +73,9 @@ flowchart TB
 │   ├── embeddings/
 │   │   └── embedder.py              # Inferência local do BAAI/bge-m3 com suporte a GPU (FP16)
 │   ├── database/
-│   │   └── ingest.py                # Ingestão em lotes (batch insert) idempotente no PostgreSQL
-│   └── retrieval/                   # (Em implementação nas Fases 5 e 6: Benchmark HNSW e Busca Híbrida)
+│   │   ├── ingest.py                # Ingestão em lotes (batch insert) idempotente no PostgreSQL
+│   │   └── benchmark_indexes.py     # Benchmark EXPLAIN ANALYZE: Seq Scan vs IVFFlat vs HNSW
+│   └── retrieval/                   # (Em implementação na Fase 6: Busca Híbrida SQL + Vetorial)
 └── tests/                           # Testes e validações
 ```
 
@@ -140,6 +142,23 @@ Conecta o pipeline de embeddings ao PostgreSQL:
 - Registra o adaptador nativo do `pgvector` no `psycopg3` (`register_vector(conn)`).
 - Verifica no banco quais pares `(chave_origem, chunk_index)` já foram inseridos anteriormente, garantindo **idempotência** (pode ser reexecutado sem duplicar linhas).
 - Processa a fila em lotes (`batch_size=32`), combinando inferência em *batch* na GPU com `cur.executemany()` em transações SQL únicas.
+
+### 5.5. Benchmark de Índices Vetoriais ANN ([`src/database/benchmark_indexes.py`](./src/database/benchmark_indexes.py))
+Avalia na prática o planejador do PostgreSQL (`EXPLAIN (ANALYZE, BUFFERS)`) sobre os 5.217 vetores de 1024 dimensões, comparando a varredura exata (`Sequential Scan`) com os dois algoritmos de *Approximate Nearest Neighbor (ANN)* do `pgvector`:
+
+```text
+==================================================================================
+RESUMO COMPARATIVO DE ENGENHARIA (5.217 VETORES DE 1024 DIMENSÕES)
+==================================================================================
+Estratégia                   | Build Time | Tamanho  | Busca (ms)   | Recall@10 
+----------------------------------------------------------------------------------
+1. Sem Índice (Seq Scan)     | 0.00s      | 0 MB     |   37.541 ms | 100.0%    
+2. Índice IVFFlat (lists=100) | 0.76s      | 42 MB    |    0.922 ms | 100.0%    
+3. Índice HNSW (m=16, ef=64) | 1.27s      | 41 MB    |    0.582 ms | 100.0%    
+----------------------------------------------------------------------------------
+Aceleração Real do HNSW sobre o Sequential Scan: ~64.5x mais rápido na busca!
+==================================================================================
+```
 
 ---
 
