@@ -91,7 +91,7 @@ Este guia foi estruturado em **6 fases progressivas** para você estudar os conc
 ## Fase 6: Queries SQL Híbridas e Integração RAG
 **Objetivo:** Cumprir o desafio central combinando filtros relacionais estritos com ordenação por similaridade de cosseno.
 
-- [ ] **6.1. Escrever a Query SQL Híbrida (`src/retrieval/search.py`):**
+- [x] **6.1. Escrever a Query SQL Híbrida (`src/retrieval/search.py`):**
   - Converter a pergunta do usuário em um vetor de 1024 dimensões usando o `bge-m3`.
   - Executar a query SQL parametrizada:
     ```sql
@@ -106,7 +106,7 @@ Este guia foi estruturado em **6 fases progressivas** para você estudar os conc
     ORDER BY embedding <=> %s::vector
     LIMIT 5;
     ```
-- [ ] **6.2. Comparar resultados Com Filtro vs Sem Filtro:**
-  - Fazer uma pergunta sobre "Cálculo" ou "Álgebra Linear" filtrando por `instituto = 'IMECC'` vs buscando na base inteira.
-- [ ] **6.3. (Opcional/Fechamento) Conectar os Chunks recuperados a um LLM via LangChain:**
-  - Montar o prompt final passando os Top-K chunks recuperados do PostgreSQL para responder perguntas acadêmicas citando a resolução/disciplina fonte.
+- [x] **6.2. Comparar resultados Com Filtro vs Sem Filtro:**
+  - Fazer uma pergunta sobre "Cálculo" / "Equações Diferenciais" filtrando por `instituto = 'IMECC'` vs buscando na base inteira (observando como `FCA`, `FT` e `IFGW` aparecem sem filtro, e como `MA312`, `MA449` e `MS650` emergem com `WHERE instituto = 'IMECC'`).
+- [x] **6.3. (Opcional/Fechamento) Conectar os Chunks recuperados a um Prompt LLM via LangChain:**
+  - Montar o prompt final (`ChatPromptTemplate`) passando os Top-K chunks recuperados do PostgreSQL para responder perguntas acadêmicas citando a disciplina/instituto fonte.

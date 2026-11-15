@@ -75,7 +75,8 @@ flowchart TB
 │   ├── database/
 │   │   ├── ingest.py                # Ingestão em lotes (batch insert) idempotente no PostgreSQL
 │   │   └── benchmark_indexes.py     # Benchmark EXPLAIN ANALYZE: Seq Scan vs IVFFlat vs HNSW
-│   └── retrieval/                   # (Em implementação na Fase 6: Busca Híbrida SQL + Vetorial)
+│   └── retrieval/
+│       └── search.py                # Motor de Busca Híbrida (WHERE relacional + <=> cosseno + Prompt RAG)
 └── tests/                           # Testes e validações
 ```
 
@@ -160,6 +161,14 @@ Aceleração Real do HNSW sobre o Sequential Scan: ~64.5x mais rápido na busca!
 ==================================================================================
 ```
 
+### 5.6. Motor de Busca Semântica Híbrida ([`src/retrieval/search.py`](./src/retrieval/search.py))
+Combina filtros SQL relacionais arbitrários (`instituto`, `semestre`, `creditos`, `pre_requisitos`) com a ordenação por distância de cosseno (`ORDER BY embedding <=> %s::vector`), utilizando `SET hnsw.iterative_scan = relaxed_order;` para garantir que o índice HNSW recupere exatamente `Top-K` documentos mesmo sob filtros relacionais seletivos, além de estruturar o prompt final via `ChatPromptTemplate` do LangChain.
+
+**Exemplo Real — Sem Filtro (Global) vs. Com Filtro (`WHERE instituto = 'IMECC'`):**
+- **Pergunta:** *"Equações diferenciais ordinárias, transformada de Laplace, séries de Fourier e aplicações em modelagem matemática"*
+- **Sem Filtro (`WHERE` omitido):** Retorna `MA311` (`IMECC`), mas mistura disciplinas equivalentes de outros campi/institutos como `LE300` (`FCA` - Limeira), `EB301` (`FT` - Limeira) e `F 620` (`IFGW` - Física).
+- **Com Filtro (`WHERE instituto = 'IMECC'`):** Isola estritamente o instituto desejado e revela disciplinas específicas como `MA311` (*Cálculo III* — `0.7342`), `MA312` (*Modelagem Matemática e Equações Diferenciais* — `0.6711`), `MA449` (*Introdução às Equações Diferenciais Parciais* — `0.6554`) e `MS650` (*Métodos de Matemática Aplicada II* — `0.6294`).
+
 ---
 
 ## 6. Validação Prática no PostgreSQL (Similaridade de Cosseno Real)
@@ -224,7 +233,19 @@ python src/embeddings/embedder.py
 python src/database/ingest.py
 ```
 
+### Passo 5: Benchmark de Índices Vetoriais e Busca Híbrida RAG
+```powershell
+# Comparar Sequential Scan vs IVFFlat vs HNSW (EXPLAIN ANALYZE + Recall@10)
+python src/database/benchmark_indexes.py
+
+# Executar a bateria comparativa de Busca Híbrida (Sem Filtro vs Com Filtro IMECC + Prompt RAG)
+python src/retrieval/search.py
+
+# Executar busca híbrida personalizada por linha de comando
+python src/retrieval/search.py --pergunta "inteligência artificial, aprendizado de máquina e redes neurais" --instituto IC
+```
+
 ---
 
 ## 8. Roteiro de Estudo Guiado
-Para acompanhar a evolução teórica e prática de cada etapa (incluindo os próximos passos de **Fase 5: Benchmark de Índices `HNSW` vs `Sequential Scan`** e **Fase 6: Motor de Busca Híbrida RAG**), consulte o checklist em [TODO.md](./TODO.md).
+Todas as 6 fases deste desafio foram concluídas e validadas. Para revisar o checklist pedagógico passo a passo, consulte o arquivo [TODO.md](./TODO.md).
