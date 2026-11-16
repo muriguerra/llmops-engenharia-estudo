@@ -51,36 +51,33 @@ Este guia foi estruturado em **6 fases progressivas** para você estudar os conc
 ## Fase 4: Camada 1 — Testes Determinísticos de Prompt (`Pytest` + `Pydantic` + `Regex`)
 **Objetivo:** Construir a primeira barreira de CI/CD (custo zero de API de juiz, execução em milissegundos) para capturar falhas estruturais e alucinações óbvias de siglas.
 
-- [ ] **4.1. Estudar a Pirâmide de Testes em LLMOps:**
-  - Por que rodar testes determinísticos **antes** de chamar um *LLM-as-a-Judge*? (Custo, determinismo, velocidade e validação de regras duras de negócio).
-- [ ] **4.2. Implementar validadores determinísticos (`src/evaluators/deterministic.py`):**
-  - **Validador de Contrato/Schema (`Pydantic`):** Verifica campos obrigatórios, tipos de dados e ausência de texto vazio.
-  - **Validador Anti-Alucinação de Siglas (`Regex` + *Context Grounding*):** Extrai todas as siglas de disciplinas citadas pelo LLM (ex: `MA111`, `MC102`, `F 128`) via expressão regular e comprova matematicamente se **100% delas pertencem ao contexto recuperado**!
-  - **Validador de Fidelidade Numérica:** Verifica se os créditos e pré-requisitos citados batem com os metadados do chunk.
-  - **Validador de Recusa (*Abstention Check*):** Garante que perguntas sem contexto válido acionem a flag/mensagem de recusa sem inventar matérias.
-- [ ] **4.3. Criar a suíte `tests/test_deterministic.py` e rodar com `pytest`:**
-  - Validar todas as asserções determinísticas em lote.
+- [x] **4.1. Estudar a Pirâmide de Testes em LLMOps:**
+  - Diferença de custo, latência e determinismo entre asserções de código (Camada 1) e *LLM-as-a-Judge* (Camada 2).
+- [x] **4.2. Implementar validadores determinísticos (`src/evaluators/deterministic.py`):**
+  - Implementados 5 validadores: `schema_valido`, `grounding_siglas` (`Regex` + inclusão em `siglas_no_contexto`), `cobertura_siglas`, `fidelidade_metadados` e `guardrail_recusa_injection`.
+  - Resultado obtido: `Prompt v1 = 30% (3/10)` vs `Prompt v2 = 100% (10/10)`.
+- [x] **4.3. Criar a suíte `tests/test_deterministic.py` e rodar com `pytest`:**
+  - `18 passed` validados no terminal (`pytest tests/test_deterministic.py -v`).
 
 ---
 
 ## Fase 5: Camada 2 — Avaliação Semântica com *LLM-as-a-Judge* (`DeepEval` / *RAG Triad*)
 **Objetivo:** Avaliar nuances semânticas onde expressões regulares não chegam, implementando a **Tríade RAG (*RAG Triad*)** e métricas customizadas (*G-Eval*).
 
-- [ ] **5.1. Estudar a teoria do *LLM-as-a-Judge* e a Tríade RAG:**
-  - **Faithfulness (Fidelidade / Anti-Alucinação):** Cada afirmação da resposta pode ser deduzida exclusivamente do `retrieval_context`?
-  - **Answer Relevancy (Relevância da Resposta):** A resposta responde diretamente à pergunta do estudante sem divagar?
-  - **Contextual Precision & Recall:** Os chunks recuperados no Top-K continham toda a informação necessária e estavam bem ranqueados?
-  - **G-Eval (*Chain-of-Thought Judge*):** Como criar uma rubrica acadêmica customizada com pesos e passos de raciocínio para o modelo Juiz, mitigando vieses (*position bias*, *verbosity bias*).
-- [ ] **5.2. Implementar os avaliadores semânticos (`src/evaluators/llm_judge.py` e `tests/test_llm_judge.py`):**
-  - Configurar o modelo Juiz e executar as métricas de *Faithfulness*, *Answer Relevancy* e *G-Eval* sobre as respostas do Orientador Acadêmico.
+- [x] **5.1. Estudar a teoria do *LLM-as-a-Judge* e a Tríade RAG:**
+  - **Faithfulness (Fidelidade / Anti-Alucinação):** Decomposição em *claims* atômicas contra o `retrieval_context`.
+  - **Answer Relevancy (Relevância da Resposta):** Aderência direta à pergunta e às restrições do estudante.
+  - **Contextual Recall:** Cobertura dos chunks recuperados no Top-K frente ao `expected_output`.
+  - **G-Eval (*Chain-of-Thought Judge*):** Rubrica acadêmica customizada com justificativa (`reason`) e mitigação de vieses.
+- [x] **5.2. Implementar os avaliadores semânticos (`src/evaluators/llm_judge.py` e `tests/test_llm_judge.py`):**
+  - Executado julgamento completo (`data/results/avaliacoes_llm_judge.json`) e validados `15 passed` no `tests/test_llm_judge.py` (`33 passed` na suíte total do `pytest`).
 
 ---
 
 ## Fase 6: Benchmark Comparativo (`Prompt v1` vs `Prompt v2`) e Documentação Final
 **Objetivo:** Rodar a bateria completa de regressão comparando `Prompt v1 (Ingênuo)` vs `Prompt v2 (Estrito)` + `Busca Sem Filtro` vs `Busca Híbrida`, gerando métricas reais e consolidando o `GUIA_TEORICO.md`.
 
-- [ ] **6.1. Implementar o Runner de Benchmark (`src/evaluators/benchmark_prompts.py`):**
-  - Executar o Golden Dataset inteiro nas configurações avaliadas.
-  - Gerar tabela comparativa no terminal e salvar relatório em `data/results/eval_report.json`.
-- [ ] **6.2. Atualizar `README.md` com as métricas reais obtidas e criar `GUIA_TEORICO.md`:**
-  - Documentar todos os resultados reais e consolidar a apostila teórica completa do Desafio 02 para entrevistas de Engenharia de IA / LLMOps.
+- [x] **6.1. Implementar o Runner de Benchmark (`src/evaluators/benchmark_prompts.py`):**
+  - Unificar Camada 1 + Camada 2 em um único relatório executivo e salvar em `data/results/eval_report.json`.
+- [x] **6.2. Atualizar `README.md` com as métricas reais obtidas e criar `GUIA_TEORICO.md`:**
+  - Documentar todos os resultados reais e consolidar a apostila teórica completa ([GUIA_TEORICO.md](./GUIA_TEORICO.md)) do Desafio 02 para entrevistas de Engenharia de IA / LLMOps.

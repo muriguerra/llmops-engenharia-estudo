@@ -1,0 +1,36 @@
+{
+  "projeto": "02-llm-eval-pipeline",
+  "base_dados": "UNICAMP 2026 (5.217 chunks no PostgreSQL 16 + pgvector)",
+  "total_casos_golden_dataset": 10,
+  "tempo_avaliacao_local_ms": 0.0,
+  "comparativo_resumo": {
+    "v1_ingenuo_sem_filtro": {
+      "versao": "v1.0.0",
+      "pass_rate_deterministico": 0.3,
+      "score_deterministico_medio": 0.76,
+      "total_violacoes_deterministicas": 20,
+      "faithfulness_medio": 0.62,
+      "total_claims_alucinadas": 14,
+      "answer_relevancy_medio": 0.43,
+      "contextual_recall_medio": 0.75,
+      "geval_orientacao_medio": 0.4,
+      "pass_rate_llm_judge": 0.3,
+      "latencia_media_geracao_ms": 672.5,
+      "status_ci_cd": "BLOCKED"
+    },
+    "v2_estrito_hibrido_sql": {
+      "versao": "v2.0.0",
+      "pass_rate_deterministico": 1.0,
+      "score_deterministico_medio": 1.0,
+      "total_violacoes_deterministicas": 0,
+      "faithfulness_medio": 1.0,
+      "total_claims_alucinadas": 0,
+      "answer_relevancy_medio": 1.0,
+      "contextual_recall_medio": 1.0,
+      "geval_orientacao_medio": 1.0,
+      "pass_rate_llm_judge": 1.0,
+      "latencia_media_geracao_ms": 699.3,
+      "status_ci_cd": "APPROVED"
+    }
+  }
+}
