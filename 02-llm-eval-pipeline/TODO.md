@@ -23,29 +23,28 @@ Este guia foi estruturado em **6 fases progressivas** para você estudar os conc
 ## Fase 2: Construção do *Golden Dataset* (Dataset Padrão-Ouro da UNICAMP)
 **Objetivo:** Entender a anatomia de um *Golden Dataset* em LLMOps e construir casos de teste reais extraídos das 5.031 disciplinas da UNICAMP coletadas no Desafio 01.
 
-- [ ] **2.1. Estudar a teoria de *Golden Datasets* para RAG:**
+- [x] **2.1. Estudar a teoria de *Golden Datasets* para RAG:**
   - Diferença entre `input` (pergunta do aluno), `expected_output` (*ground truth* / gabarito), `retrieval_context` (chunks reais recuperados) e metadados esperados (`instituto_esperado`, `siglas_obrigatorias`, `cenario`).
   - Categorias essenciais de casos de teste:
-    1. **Consultas Diretas de Ementa/Pré-requisito** (ex: `MA111`, `MA311`, `MC102`).
-    2. **Consultas Multi-Filtro / Comparativas** (ex: matérias de Cálculo no `IMECC` vs outros institutos).
-    3. **Casos de Borda (*Out-of-Scope* / *Negative Rejection*):** Perguntas sobre cursos/disciplinas que não existem no contexto recuperado (onde o LLM **deve recusar** responder em vez de alucinar).
-    4. **Casos Adversariais (*Prompt Injection* leve):** Tentativa do usuário de fazer o orientador ignorar as regras da UNICAMP.
-- [ ] **2.2. Implementar o gerador do Golden Dataset (`src/dataset/build_golden_dataset.py`):**
-  - Consultar os dados reais do Desafio 01 (`01-rag-postgresql-unicamp/data/processed/chunks_2026.jsonl` e/ou PostgreSQL) para gerar `data/golden_dataset/unicamp_golden_dataset.jsonl` com casos 100% fundamentados no catálogo oficial de 2026.
+    1. **Consultas Diretas de Ementa/Pré-requisito** (`GD-01`, `GD-02`, `GD-03`, `GD-06`).
+    2. **Consultas Multi-Filtro / Comparativas** (`GD-04` e `GD-05`).
+    3. **Casos de Borda (*Out-of-Scope* / *Negative Rejection*):** Perguntas sobre cursos/dados que não existem no contexto recuperado (`GD-07` e `GD-08`).
+    4. **Casos Adversariais (*Prompt Injection* e Sigla Falsa):** Tentativa de sobrescrever regras em `MA311` (`GD-09`) e sigla inexistente `MC999` (`GD-10`).
+- [x] **2.2. Implementar o gerador do Golden Dataset (`src/dataset/build_golden_dataset.py`):**
+  - Consultar os dados reais do Desafio 01 via PostgreSQL (`pgvector`) + `BAAI/bge-m3` em GPU (`FP16`) para gerar `data/golden_dataset/unicamp_golden_dataset.jsonl` com 10 casos validados via `Pydantic`.
 
 ---
 
 ## Fase 3: Versionamento de Prompts e Sistema Sob Teste (RAG Client)
 **Objetivo:** Tratar Prompts como código versionado (*Prompt-as-Code*) e criar duas versões contrastantes do Orientador Acadêmico para medir evolução e regressão.
 
-- [ ] **3.1. Estudar *Prompt Versioning* e Contratos de Saída Estruturada (`Pydantic`):**
-  - Por que respostas em texto livre são difíceis de validar em produção?
-  - Como exigir respostas estruturadas (ou seções padronizadas com citações explícitas de `[Sigla - Instituto]`, `créditos` e `pré-requisitos`).
-- [ ] **3.2. Criar o catálogo de Prompts (`src/prompts/prompt_templates.py`):**
-  - **`PROMPT_V1_INGENUO`:** Prompt curto e permissivo (*"Responda à dúvida do aluno sobre a UNICAMP usando o contexto"*), propenso a extrapolar conhecimento prévio do LLM ou omitir pré-requisitos/institutos.
-  - **`PROMPT_V2_ESTRITO`:** Prompt engenheirado com regras explícitas de *grounding* estrito, citação obrigatória de sigla/instituto/créditos/pré-requisitos e regra de recusa segura (*abstention*) quando a informação não consta nos chunks.
-- [ ] **3.3. Implementar o Pipeline Gerador (`src/rag_client/advisor.py`):**
-  - Conectar a busca híbrida do Desafio 01 (ou o contexto do Golden Dataset) ao LLM escolhido, registrando tempo de latência, tokens consumidos e saída estruturada.
+- [x] **3.1. Estudar *Prompt Versioning* e Contratos de Saída Estruturada (`Pydantic`):**
+  - Modelado o schema `RespostaOrientador` exigindo JSON tipado com `resposta_texto`, `disciplinas_citadas`, `instituto_identificado` e `recusa_ou_alerta_acionado`.
+- [x] **3.2. Criar o catálogo de Prompts (`src/prompts/prompt_templates.py`):**
+  - **`PROMPT_V1_INGENUO` (`v1.0.0`):** Prompt curto e permissivo alimentado pela busca sem filtro (`retrieval_context_sem_filtro`).
+  - **`PROMPT_V2_ESTRITO` (`v2.0.0`):** Prompt engenheirado com 5 guardrails (grounding exclusivo, isolamento de instituto, recusa segura *negative rejection*, blindagem contra *Prompt Injection* e JSON estrito) alimentado pela busca híbrida SQL (`retrieval_context`).
+- [x] **3.3. Implementar o Pipeline Gerador (`src/rag_client/advisor.py`):**
+  - Executados os 10 casos nas duas versões de prompt via Subagentes isolados (`data/results/respostas_geradas.json`) com suporte nativo também a `gemini` e `openai` via `.env`.
 
 ---
 
