@@ -1,0 +1,21 @@
+# 1. Framework de Testes Deterministicos e Contratos de Dados
+pytest>=8.3.0
+pydantic>=2.9.0
+
+# 2. Framework de Avaliacao Semantica (LLM-as-a-Judge & RAG Triad)
+deepeval>=1.4.0
+
+# 3. Integracao com o Motor RAG do Desafio 01 (PostgreSQL + pgvector + bge-m3)
+psycopg[binary]>=3.2.0
+pgvector>=0.3.0
+sentence-transformers>=3.0.0
+langchain-core>=0.3.0
+
+# 4. Provedores de LLM (Gerador e Juiz)
+google-genai>=1.0.0
+openai>=1.50.0
+
+# 5. Utilitarios, Relatorios e Variaveis de Ambiente
+python-dotenv>=1.0.1
+tabulate>=0.9.0
+rich>=13.9.0
